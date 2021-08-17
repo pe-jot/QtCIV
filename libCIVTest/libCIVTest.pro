@@ -15,8 +15,14 @@ SOURCES +=  tst_civprotocol_smeter_test.cpp \
     tst_civprotocol_private_test.cpp \
     tst_ic705serial_test.cpp
 
-release: LIBS += -L../libCIV/release -llibCIV
-debug: LIBS += -L../libCIV/debug -llibCIV
+# Only Windows has these additional debug/release subfolders
+win32: {
+    release: LIBS += -L../libCIV/release -llibCIV
+    debug: LIBS += -L../libCIV/debug -llibCIV
+}
+else: {
+    LIBS += -L../libCIV -llibCIV
+}
 INCLUDEPATH += ../libCIV
 PRE_TARGETDEPS += ../libCIV
 

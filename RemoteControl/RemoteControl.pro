@@ -2,8 +2,14 @@ QT += quick qml serialport
 
 CONFIG += c++11
 
-release: LIBS += -L../libCIV/release -llibCIV
-debug: LIBS += -L../libCIV/debug -llibCIV
+# Only Windows has these additional debug/release subfolders
+win32: {
+    release: LIBS += -L../libCIV/release -llibCIV
+    debug: LIBS += -L../libCIV/debug -llibCIV
+}
+else: {
+    LIBS += -L../libCIV -llibCIV
+}
 INCLUDEPATH += ../libCIV
 PRE_TARGETDEPS += ../libCIV
 
@@ -40,6 +46,7 @@ HEADERS += \
     remotecontrol.h \
     rotaryencoder.h
 
+# Pack all necessary modules into output directory on release build
 CONFIG(release, debug|release): {
     win32: QMAKE_POST_LINK += windeployqt.exe --no-translations --no-system-d3d-compiler --no-webkit2 --no-opengl-sw --no-angle --no-virtualkeyboard --qmldir $$PWD $$OUT_PWD/release
 }
