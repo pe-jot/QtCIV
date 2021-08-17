@@ -21,4 +21,17 @@ Qt QML based demo project making use of most of the functionality implemented in
 
 ***SatSync***
 Qt Widgets based project used to synchronize transmit frequency corresponding to receive frequency shift when making satellite communication (compensating Doppler shift).
+
+The intended usecase is that one tunes to the exact receiving frequency on the transmitter and the software calculates the correct transmit frequency and sets it then on the device.
+
+The transmit frequency is being calculated as follows:
+$$
+f_{TX} ~=~ f_{TX0} - \Delta f_{TX} ~=~ f_{TX0} - \Delta f_{RX} * \frac{f_{TX0}}{f_{RX0}} ~=~ f_{TX0} - (f_{RX} - f_{RX0}) * \frac{f_{TX0}}{f_{RX0}}
+$$
+
+Windows GUI (with transmitter connected):
 ![Screenshot SatSync GUI](SatSync.png)
+
+Linux / Ubuntu GUI (no connection to transceiver):
+![Screenshot SatSync GUI Ubuntu](SatSync_Ubuntu.png)
+
