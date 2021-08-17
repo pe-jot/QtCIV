@@ -28,8 +28,9 @@ HEADERS += \
     satsync.h \
     satsyncgui.h
 
-FORMS += \
-    satsyncgui.ui
+# QtQuick forms look quite different on Windows and on Linux (Ubuntu), so we hold separate form files
+win32: FORMS += satsyncgui_win.ui
+else: FORMS += satsyncgui_fusion.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
