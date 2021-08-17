@@ -26,10 +26,9 @@ The intended usecase is that one tunes to the exact receiving frequency on the t
 
 The transmit frequency is being calculated as follows:
 
-![formula](https://render.githubusercontent.com/render/math?math=f_{TX} = f_{TX0} - \Delta f_{TX} = f_{TX0} - \Delta f_{RX} * \frac{f_{TX0}}{f_{RX0}} = f_{TX0} - (f_{RX} - f_{RX0}) * \frac{f_{TX0}}{f_{RX0}})
+![Doppler shift formula](DopplerShiftFormula.png)
 
 Windows GUI (with transmitter connected):
 ![Screenshot SatSync GUI](SatSync.png)
-
 Linux / Ubuntu GUI (no connection to transceiver):
 ![Screenshot SatSync GUI Ubuntu](SatSync_Ubuntu.png)
