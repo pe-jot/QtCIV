@@ -50,7 +50,7 @@ void GPSAltitudeInfo::fromRawData(const QByteArray& rawData)
     }
 
     // Alitude may be empty (0xFF) in case of a 2D GPS fix.
-    static const auto noAltitude = QByteArray(4, 0xFF);
+    static const auto noAltitude = QByteArray(4, static_cast<unsigned char>(0xFF));
     if (rawData == noAltitude)
     {
         _isValid = false;
@@ -87,7 +87,7 @@ void GPSSpeedInfo::fromRawData(const QByteArray& rawData)
     }
 
     // Speed may be empty (0xFF) in case of a 2D GPS fix.
-    static const auto noSpeed = QByteArray(3, 0xFF);
+    static const auto noSpeed = QByteArray(3, static_cast<unsigned char>(0xFF));
     if (rawData == noSpeed)
     {
         _isValid = false;
