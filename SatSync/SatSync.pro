@@ -17,7 +17,7 @@ PRE_TARGETDEPS += ../libCIV
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
     main.cpp \
@@ -39,5 +39,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 # Pack all necessary modules into output directory on release build
 CONFIG(release, debug|release): {
-    win32: QMAKE_POST_LINK += windeployqt.exe --no-translations --no-system-d3d-compiler --no-webkit2 --no-opengl-sw --no-angle --no-virtualkeyboard $$OUT_PWD/release
+    win32: QMAKE_POST_LINK += $(QTDIR)/bin/windeployqt.exe --no-translations --no-system-d3d-compiler --no-webkit2 --no-opengl-sw --no-angle --no-virtualkeyboard $$OUT_PWD/release
 }
