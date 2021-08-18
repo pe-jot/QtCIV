@@ -1,6 +1,10 @@
 #include "satsyncgui.h"
 #include "ic705serial.h"
-#include "ui_satsyncgui.h"
+#ifdef Q_OS_WINDOWS
+  #include "ui_satsyncgui_win.h"
+#else
+  #include "ui_satsyncgui_fusion.h"
+#endif
 
 SatSyncGui::SatSyncGui(QWidget *parent)
     : QMainWindow(parent)
