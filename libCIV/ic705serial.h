@@ -2,7 +2,7 @@
 
 #include "IICOMcomm.h"
 #include "civprotocol.h"
-#include "ICIVcomm.h"
+#include "usbcdc.h"
 #include <QObject>
 #include <QSerialPort>
 
@@ -17,6 +17,7 @@ public:
     ~IC705Serial();
     void init(void);
     void writeData(const QByteArray& data);
+    void writePTT(const bool& value);
 
 private:
     static const int BaudRate = QSerialPort::Baud115200;
@@ -25,7 +26,7 @@ private:
     static const int TxTimeout = 1000;
 
     CIVProtocol *_civ = nullptr;
-    ICIVComm *_comm = nullptr;
+    UsbCdc *_comm = nullptr;
 
     QString FindIcomPortName();
     bool TryGetTransceiverId(QString portName);

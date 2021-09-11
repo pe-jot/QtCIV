@@ -19,7 +19,6 @@ SOURCES += \
     usbcdc.cpp
 
 HEADERS += \
-    ICIVcomm.h \
     IICOMcomm.h \
     civprotocol.h \
     gpsinfo.h \

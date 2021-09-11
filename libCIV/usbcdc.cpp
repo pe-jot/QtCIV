@@ -71,3 +71,23 @@ void UsbCdc::writeData(const QByteArray& data)
     _usbCdcPort->write(data);
     _usbCdcPort->waitForBytesWritten(_txTimeout);
 }
+
+
+void UsbCdc::writeDTR(const bool &value)
+{
+    if (_usbCdcPort == nullptr || !_usbCdcPort->isOpen())
+    {
+        return;
+    }
+    _usbCdcPort->setDataTerminalReady(value);
+}
+
+
+void UsbCdc::writeRTS(const bool &value)
+{
+    if (_usbCdcPort == nullptr || !_usbCdcPort->isOpen())
+    {
+        return;
+    }
+    _usbCdcPort->setRequestToSend(value);
+}

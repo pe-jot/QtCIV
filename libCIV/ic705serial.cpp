@@ -1,5 +1,4 @@
 #include "ic705serial.h"
-#include "usbcdc.h"
 #include <QSerialPortInfo>
 #include <QDebug>
 
@@ -15,7 +14,7 @@ IC705Serial::~IC705Serial()
 
     if (_comm != nullptr)
     {
-        disconnect(_comm, &ICIVComm::dataReceived, this, &IC705Serial::dataReceivedSlot);
+        disconnect(_comm, &UsbCdc::dataReceived, this, &IC705Serial::dataReceivedSlot);
         delete _comm;
         _comm = nullptr;
     }
@@ -45,7 +44,7 @@ void IC705Serial::init()
         return;
     }
 
-    connect(_comm, &ICIVComm::dataReceived, this, &IC705Serial::dataReceivedSlot);
+    connect(_comm, &UsbCdc::dataReceived, this, &IC705Serial::dataReceivedSlot);
     _name = portName;
     _isOpen = true;
     emit initComplete(true);
@@ -57,6 +56,15 @@ void IC705Serial::writeData(const QByteArray& data)
     if (_comm && _comm->isOpen())
     {
         _comm->writeData(data);
+    }
+}
+
+
+void IC705Serial::writePTT(const bool& value)
+{
+    if (_comm && _comm->isOpen())
+    {
+        _comm->writeRTS(value);
     }
 }
 

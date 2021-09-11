@@ -8,6 +8,7 @@ class IICOMcomm : public QObject
 public:
     virtual void init() = 0;
     virtual void writeData(const QByteArray& data) = 0;
+    virtual void writePTT(const bool& value) = 0;
     bool isOpen() { return _isOpen; }
     QString getName() { return _name; }
 
