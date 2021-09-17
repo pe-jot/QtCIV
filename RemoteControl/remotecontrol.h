@@ -43,7 +43,7 @@ public:
             emit statusTextChanged();
             if (displayTime > 0)
             {
-                _statusTextTimer.singleShot(displayTime, this, SLOT(onStatusTextTimerElapsed()));
+                _statusTextTimer->singleShot(displayTime, this, SLOT(onStatusTextTimerElapsed()));
             }
         }
     }
@@ -64,7 +64,7 @@ public:
         if (_frequencyPollIndex != index)
         {
             _frequencyPollIndex = index;
-            _pollTimer.setInterval(_pollIntervalList[index]);
+            _pollTimer->setInterval(_pollIntervalList[index]);
             emit frequencyPollIndexChanged();
         }
     }
@@ -266,10 +266,10 @@ private:
     static const QList<int> _pollIntervalList;
 
     CIVProtocol _civ;
-    QTimer _statusTextTimer;
-    QTimer _pollTimer;
-    QTimer _gpsTimer;
-    IICOMcomm *_comm = nullptr;
+    QTimer* _statusTextTimer;
+    QTimer* _pollTimer;
+    QTimer* _gpsTimer;
+    IICOMcomm* _comm = nullptr;
 
     QString _statusText = "";
     int _frequencyPollIndex = 0;

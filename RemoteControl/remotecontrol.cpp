@@ -7,8 +7,10 @@ const QList<int> RemoteControl::_pollIntervalList = QList<int>() << 100 << 250 <
 
 
 RemoteControl::RemoteControl()
+    : _pollTimer(new QTimer())
+    , _gpsTimer(new QTimer())
+    , _comm(new IC705Serial())
 {
-    _comm = new IC705Serial();
     connect(_comm, &IICOMcomm::initComplete, this, &RemoteControl::commInitDone);
     _comm->init();
 }
@@ -16,12 +18,10 @@ RemoteControl::RemoteControl()
 
 RemoteControl::~RemoteControl()
 {
-    if (_comm != nullptr)
-    {
-        QObject::disconnect(_comm, &IICOMcomm::dataReceived, this, &RemoteControl::dataReceived);
-        delete _comm;
-        _comm = nullptr;
-    }
+    QObject::disconnect(_comm, &IICOMcomm::dataReceived, this, &RemoteControl::dataReceived);
+    _comm->deleteLater();
+    _pollTimer->deleteLater();
+    _gpsTimer->deleteLater();
 }
 
 
@@ -37,12 +37,12 @@ void RemoteControl::commInitDone(const bool success)
 
     connect(_comm, &IICOMcomm::dataReceived, this, &RemoteControl::dataReceived);
 
-    _pollTimer.setInterval(_pollIntervalList[_frequencyPollIndex]);
-    connect(&_pollTimer, &QTimer::timeout, this, &RemoteControl::pollInterval);
-    _pollTimer.start();
+    _pollTimer->setInterval(_pollIntervalList[_frequencyPollIndex]);
+    connect(_pollTimer, &QTimer::timeout, this, &RemoteControl::pollInterval);
+    _pollTimer->start();
 
-    _gpsTimer.setInterval(1000);
-    connect(&_gpsTimer, &QTimer::timeout, this, &RemoteControl::gpsPollInterval);
+    _gpsTimer->setInterval(1000);
+    connect(_gpsTimer, &QTimer::timeout, this, &RemoteControl::gpsPollInterval);
     connect(this, &RemoteControl::gpsEnableChanged, this, &RemoteControl::onGpsEnableChanged);
 }
 
@@ -65,7 +65,7 @@ void RemoteControl::pollInterval()
 
 void RemoteControl::onGpsEnableChanged()
 {
-    _gpsEnable ? _gpsTimer.start() : _gpsTimer.stop();
+    _gpsEnable ? _gpsTimer->start() : _gpsTimer->stop();
     _comm->writeData(_civ.CmdSetGpsPower(_gpsEnable));
 }
 
