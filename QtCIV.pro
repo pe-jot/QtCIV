@@ -4,6 +4,7 @@ SUBDIRS = \
     libCIV \
     libCIVTest \
     RemoteControl \
-    SatSync
+    SatSync \
+	CIVBridge
 
 CONFIG += ordered
