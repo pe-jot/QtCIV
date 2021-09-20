@@ -17,8 +17,10 @@ UsbCdc::UsbCdc(const QString portName, const int baudRate, const int txTimeout)
         return;
     }
 
-    _isOpen = _usbCdcPort->isOpen();
+    _usbCdcPort->setDataTerminalReady(false);
+    _usbCdcPort->setRequestToSend(false);
     _usbCdcPort->clear();
+    _isOpen = _usbCdcPort->isOpen();
     QSerialPort::connect(_usbCdcPort, &QSerialPort::readyRead, this, &UsbCdc::readData);
 }
 
