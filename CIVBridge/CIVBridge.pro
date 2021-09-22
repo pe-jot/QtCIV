@@ -21,6 +21,7 @@ PRE_TARGETDEPS += ../libCIV
 
 SOURCES += \
         civbridge.cpp \
+        consolesignalhandler.cpp \
         main.cpp \
         raspigpio.cpp \
         talkkonnectclient.cpp \
@@ -28,6 +29,7 @@ SOURCES += \
 
 HEADERS += \
     civbridge.h \
+    consolesignalhandler.h \
     raspigpio.h \
     talkkonnectclient.h \
     websocketserver.h

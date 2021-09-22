@@ -13,9 +13,11 @@ const QString CIVBridge::websocketOvfStatusCommand = QStringLiteral("ovfStatus")
 const QString CIVBridge::websocketSMeterCommand = QStringLiteral("sMeter");
 
 
-CIVBridge::CIVBridge(QObject *parent)
+CIVBridge::CIVBridge(quint16 websocketPort, quint16 talkkonnectPort, QObject *parent)
     : QObject(parent)
     , _pollTimer(new QTimer())
+    , _websocketServerPort(websocketPort)
+    , _talkkonnectHttpPort(talkkonnectPort)
 {
     _websocketServer = new WebSocketServer(_websocketServerPort);
     connect(_websocketServer, &WebSocketServer::commandReceived, this, &CIVBridge::onWebsocketCommandReceived);

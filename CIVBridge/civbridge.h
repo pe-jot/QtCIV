@@ -14,7 +14,7 @@ class CIVBridge : public QObject
     Q_OBJECT
 
 public:
-    explicit CIVBridge(QObject *parent = nullptr);
+    explicit CIVBridge(quint16 websocketPort, quint16 talkkonnectPort, QObject *parent = nullptr);
     CIVBridge(const CIVBridge&) = delete;
     CIVBridge& operator=(const CIVBridge&) = delete;
     ~CIVBridge();
