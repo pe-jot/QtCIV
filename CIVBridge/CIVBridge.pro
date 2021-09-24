@@ -30,6 +30,7 @@ SOURCES += \
 HEADERS += \
     civbridge.h \
     consolesignalhandler.h \
+    main.h \
     raspigpio.h \
     talkkonnectclient.h \
     websocketserver.h
