@@ -23,7 +23,7 @@ WebSocketServer::WebSocketServer(const quint16 port, const quint16 maxClients, Q
     }
     else
     {
-        qDebug() << "Error: " << _webSocketServer->errorString();
+        qCritical() << "Error: " << _webSocketServer->errorString();
     }
 }
 
