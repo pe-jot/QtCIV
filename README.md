@@ -31,3 +31,6 @@ Windows GUI (with transmitter connected):
 
 Linux / Ubuntu GUI (no connection to transceiver):  
 ![Screenshot SatSync GUI Ubuntu](SatSync_Ubuntu.png)
+
+### CIVBridge
+Please see [RemoteTRX](https://github.com/pe-jot/RemoteTRX) for details.
