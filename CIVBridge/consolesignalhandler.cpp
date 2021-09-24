@@ -27,11 +27,12 @@ BOOL WINAPI ConsoleSignalHandler::ctrlHandler(DWORD fdwCtrlType)
     }
 }
 #else
-static void ConsoleSignalHandler::signalHandler(int signum)
+void ConsoleSignalHandler::signalHandler(int signum)
 {
-    if (_inst != nullptr)
+    Q_UNUSED(signum)
+    if (inst != nullptr)
     {
-        emit _inst->consoleSignalReceived();
+        emit inst->consoleSignalReceived();
     }
 }
 #endif
@@ -47,7 +48,7 @@ ConsoleSignalHandler* ConsoleSignalHandler::getInstance()
 #if defined(_WIN32) || defined(_WIN64)
         if (!SetConsoleCtrlHandler(ctrlHandler, true))
         {
-            qDebug() << "SetConsoleCtrlHandler() failed!";
+            qCritical() << "SetConsoleCtrlHandler() failed!";
         }
 #else
         ::signal(SIGINT, signalHandler);

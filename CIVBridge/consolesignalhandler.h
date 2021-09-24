@@ -2,10 +2,10 @@
 
 #include <QMutex>
 #include <QObject>
+#include <signal.h>
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
-#include <signal.h>
 #endif
 
 class ConsoleSignalHandler : public QObject
