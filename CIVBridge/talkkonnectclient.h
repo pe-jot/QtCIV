@@ -24,10 +24,9 @@ signals:
 private:
     static const int socketTimeout;
 
-    // Must not be references since we get them from the parent thread!
-    const QHostAddress _httpHost;
-    const quint16 _httpPort;
-    const QString _httpCommand;
+    const QHostAddress& _httpHost;
+    const quint16& _httpPort;
+    const QString& _httpCommand;
 
     QTcpSocket* _socket = nullptr;
 };
@@ -50,8 +49,10 @@ private slots:
     void onDropoutDelayElapsed();
 
 private:
-    const QHostAddress& _httpHost;
-    const quint16& _httpPort;
+    // Must not be references because we pass them to the child thread
+    // and we get them already as reference from the main.cpp!
+    const QHostAddress _httpHost;
+    const quint16 _httpPort;
 
     bool _stopCommandBlocked = false;
 
