@@ -14,7 +14,7 @@ class CIVBridge : public QObject
     Q_OBJECT
 
 public:
-    explicit CIVBridge(quint16 websocketPort, quint16 talkkonnectPort, QObject *parent = nullptr);
+    explicit CIVBridge(const quint16& websocketPort = 88, const quint16& talkkonnectPort = 81, const quint8& voiceactivityPin = 5, const quint8& heartbeatPin = 25, QObject *parent = nullptr);
     CIVBridge(const CIVBridge&) = delete;
     CIVBridge& operator=(const CIVBridge&) = delete;
     ~CIVBridge();
@@ -37,6 +37,7 @@ private:
     CIVProtocol _civ;
     RaspiGpio _raspiGpio;
     QTimer* _pollTimer;
+    QTimer* _watchdogTimer;
     WebSocketServer* _websocketServer = nullptr;
     IICOMcomm* _comm = nullptr;
     TalkkonnectClient* _talkkonnect = nullptr;
@@ -48,15 +49,14 @@ private:
     int _sMeter = 0;
 
     const int _pollIntervalMs = 100;
-    const quint16 _websocketServerPort = 88;
-    const quint16 _talkkonnectHttpPort = 81;
-    const QHostAddress _talkkonnectHttpHost = QHostAddress::LocalHost;
+    const int _watchdogTimeoutMs = 3000;
 
     static const QString websocketErrorCommand;
     static const QString websocketRxFrequencyCommand;
     static const QString websocketSetRxFrequencyCommand;
     static const QString websocketTxFrequencyCommand;
     static const QString websocketSquelchStatusCommand;
+    static const QString websocketTxStatusCommand;
     static const QString websocketOvfStatusCommand;
     static const QString websocketSMeterCommand;
 };

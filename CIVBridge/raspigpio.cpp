@@ -13,13 +13,16 @@
 #define BCM2708_PERI_BASE	0x3F000000						// RPi 2 & 3
 #define BCM2711_PERI_BASE	0xFE000000						// RPi 4
 #define GPIO_BASE			(BCM2711_PERI_BASE + 0x200000)	// GPIO controller
-#define VOICEACTIVITY_PIN	5
 #define PAGE_SIZE			(4 * 1024)
 #define BLOCK_SIZE			(4 * 1024)
 
+volatile unsigned *gpio;
+
 #define GET_GPIO(g)         (*(gpio + 13) & (1 << g))       // 0 if LOW, (1 << g) if HIGH
 
-RaspiGpio::RaspiGpio()
+RaspiGpio::RaspiGpio(const quint8& voiceactivityPin, const quint8& heartbeatPin)
+    : _voiceactivityPin(voiceactivityPin)
+    , _heartbeatPin(heartbeatPin)
 {
     // Set up memory regions to access GPIO
     int  mem_fd;
@@ -28,7 +31,7 @@ RaspiGpio::RaspiGpio()
     // open /dev/mem
     if ((mem_fd = open("/dev/mem", O_RDWR|O_SYNC) ) < 0)
     {
-        qDebug() << "Error: can't open /dev/mem";
+        qCritical() << "Error: can't open /dev/mem";
         exit(-1);
     }
 
@@ -46,7 +49,7 @@ RaspiGpio::RaspiGpio()
 
     if (gpio_map == MAP_FAILED)
     {
-        qDebug() << "mmap error" << errno;
+        qCritical() << "mmap error" << errno;
         return;
     }
 
@@ -54,24 +57,44 @@ RaspiGpio::RaspiGpio()
     gpio = (volatile unsigned *)gpio_map;
 }
 
-bool RaspiGpio::ReadVoiceActivityPin() const
+bool ReadPin(const quint8& pinNumber)
 {
     if (gpio == nullptr)
     {
         return false;
     }
-    return (GET_GPIO(VOICEACTIVITY_PIN) != 0);
+    return (GET_GPIO(pinNumber) != 0);
+}
+
+bool RaspiGpio::ReadVoiceactivityPin() const
+{
+    return ReadPin(_voiceactivityPin);
+}
+
+bool RaspiGpio::ReadHeartbeatPin() const
+{
+    return ReadPin(_heartbeatPin);
 }
 
 #else
 
-RaspiGpio::RaspiGpio()
+RaspiGpio::RaspiGpio(const quint8& voiceactivityPin, const quint8& heartbeatPin)
+    : _voiceactivityPin(voiceactivityPin)
+    , _heartbeatPin(heartbeatPin)
 {
 }
 
-bool RaspiGpio::ReadVoiceActivityPin() const
+bool RaspiGpio::ReadVoiceactivityPin() const
 {
     return false;
+}
+
+bool RaspiGpio::ReadHeartbeatPin() const
+{
+    // Simulate toggling heartbeat pin
+    static bool pinState = false;
+    pinState = !pinState;
+    return pinState;
 }
 
 #endif

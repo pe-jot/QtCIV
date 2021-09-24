@@ -9,17 +9,19 @@ const QString CIVBridge::websocketRxFrequencyCommand = QStringLiteral("rxFreq");
 const QString CIVBridge::websocketSetRxFrequencyCommand = QStringLiteral("setRxFreq");
 const QString CIVBridge::websocketTxFrequencyCommand = QStringLiteral("txFreq");
 const QString CIVBridge::websocketSquelchStatusCommand = QStringLiteral("squelchStatus");
+const QString CIVBridge::websocketTxStatusCommand = QStringLiteral("txStatus");
 const QString CIVBridge::websocketOvfStatusCommand = QStringLiteral("ovfStatus");
 const QString CIVBridge::websocketSMeterCommand = QStringLiteral("sMeter");
 
 
-CIVBridge::CIVBridge(quint16 websocketPort, quint16 talkkonnectPort, QObject *parent)
+CIVBridge::CIVBridge(const quint16& websocketPort, const quint16& talkkonnectPort, const quint8& voiceactivityPin, const quint8& heartbeatPin, QObject *parent)
     : QObject(parent)
+    , _raspiGpio(voiceactivityPin, heartbeatPin)
     , _pollTimer(new QTimer())
-    , _websocketServerPort(websocketPort)
-    , _talkkonnectHttpPort(talkkonnectPort)
+    , _watchdogTimer(new QTimer())
+    , _websocketServer(new WebSocketServer(websocketPort))
+    , _talkkonnect(new TalkkonnectClient(QHostAddress::LocalHost, talkkonnectPort))
 {
-    _websocketServer = new WebSocketServer(_websocketServerPort);
     connect(_websocketServer, &WebSocketServer::commandReceived, this, &CIVBridge::onWebsocketCommandReceived);
     connect(_websocketServer, &WebSocketServer::clientConnected, this, &CIVBridge::onWebsocketClientConnected);
 
@@ -27,7 +29,7 @@ CIVBridge::CIVBridge(quint16 websocketPort, quint16 talkkonnectPort, QObject *pa
     connect(_comm, &IICOMcomm::initComplete, this, &CIVBridge::onCommInitDone);
     connect(_comm, &IICOMcomm::dataReceived, this, &CIVBridge::onCIVDataReceived);
 
-    _talkkonnect = new TalkkonnectClient(_talkkonnectHttpHost, _talkkonnectHttpPort);
+    _watchdogTimer->setInterval(_watchdogTimeoutMs);
 }
 
 
@@ -41,6 +43,7 @@ CIVBridge::~CIVBridge()
     disconnect(_comm, &IICOMcomm::dataReceived, this, &CIVBridge::onCIVDataReceived);
     _comm->deleteLater();
 
+    _watchdogTimer->deleteLater();
     _talkkonnect->deleteLater();
     _pollTimer->deleteLater();
 }
@@ -114,18 +117,30 @@ void CIVBridge::onCIVDataReceived(const QList<QByteArray> data)
 
 void CIVBridge::onPollInterval() const
 {
+    // Poll TRX status
     _comm->writeData(_civ.CmdReadRxFreq());
     _comm->writeData(_civ.CmdReadTxFreq());
     _comm->writeData(_civ.CmdReadSquelchStatus());
     _comm->writeData(_civ.CmdReadOvfStatus());
     _comm->writeData(_civ.CmdReadSMeter());
 
+    // A voiceactivity pin toggle triggers the PTT on the TRX
     static bool oldVoiceActivityStatus = false;
-    bool voiceActivtyStatus = _raspiGpio.ReadVoiceActivityPin();
-    if (voiceActivtyStatus != oldVoiceActivityStatus)
+    bool voiceActivtyStatus = _raspiGpio.ReadVoiceactivityPin();
+    if (voiceActivtyStatus != oldVoiceActivityStatus && _watchdogTimer->isActive())
     {
         _comm->writePTT(voiceActivtyStatus);
+        _websocketServer->broadcastUpdate(websocketTxStatusCommand, { voiceActivtyStatus });
         oldVoiceActivityStatus = voiceActivtyStatus;
+    }
+
+    // A heartbeat pin toggle restarts the watchdog timer
+    static bool oldHeartBeatStatus = false;
+    bool heartBeatStatus = _raspiGpio.ReadHeartbeatPin();
+    if (heartBeatStatus != oldHeartBeatStatus)
+    {
+        _watchdogTimer->start();
+        oldHeartBeatStatus = voiceActivtyStatus;
     }
 }
 
@@ -139,6 +154,7 @@ void CIVBridge::setRxFrequency(int frequency)
     }
 }
 
+
 void CIVBridge::setTxFrequency(int frequency)
 {
     if (_txFrequency != frequency)
@@ -147,6 +163,7 @@ void CIVBridge::setTxFrequency(int frequency)
         _txFrequency = frequency;
     }
 }
+
 
 void CIVBridge::setSquelchStatus(bool squelchStatus)
 {
@@ -158,6 +175,7 @@ void CIVBridge::setSquelchStatus(bool squelchStatus)
     }
 }
 
+
 void CIVBridge::setOverflowStatus(bool overflowStatus)
 {
     if (_overflowStatus != overflowStatus)
@@ -166,6 +184,7 @@ void CIVBridge::setOverflowStatus(bool overflowStatus)
         _overflowStatus = overflowStatus;
     }
 }
+
 
 void CIVBridge::setSMeter(int sMeter)
 {
