@@ -26,7 +26,8 @@ private:
 
     const QHostAddress& _httpHost;
     const quint16& _httpPort;
-    const QString& _httpCommand;
+    // Must not a be reference because we get it from the parent thread!
+    const QString _httpCommand;
 
     QTcpSocket* _socket = nullptr;
 };
