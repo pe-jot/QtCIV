@@ -25,6 +25,7 @@ private slots:
     void onCommInitDone(const bool success);
     void onCIVDataReceived(const QList<QByteArray> data);
     void onPollInterval() const;
+    void onWatchdogTimeout() const;
 
 private:
     void sendTalkkonnectTransmitCommand(const bool& start) const;

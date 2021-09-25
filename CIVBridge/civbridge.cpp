@@ -29,6 +29,7 @@ CIVBridge::CIVBridge(const quint16& websocketPort, const quint16& talkkonnectPor
     connect(_comm, &IICOMcomm::initComplete, this, &CIVBridge::onCommInitDone);
     connect(_comm, &IICOMcomm::dataReceived, this, &CIVBridge::onCIVDataReceived);
 
+    connect(_watchdogTimer, &QTimer::timeout, this, &CIVBridge::onWatchdogTimeout);
     _watchdogTimer->setInterval(_watchdogTimeoutMs);
 }
 
@@ -43,7 +44,9 @@ CIVBridge::~CIVBridge()
     disconnect(_comm, &IICOMcomm::dataReceived, this, &CIVBridge::onCIVDataReceived);
     _comm->deleteLater();
 
+    disconnect(_watchdogTimer, &QTimer::timeout, this, &CIVBridge::onWatchdogTimeout);
     _watchdogTimer->deleteLater();
+
     _talkkonnect->deleteLater();
     _pollTimer->deleteLater();
 }
@@ -126,12 +129,12 @@ void CIVBridge::onPollInterval() const
 
     // A voiceactivity pin toggle triggers the PTT on the TRX
     static bool oldVoiceActivityStatus = false;
-    bool voiceActivtyStatus = _raspiGpio.ReadVoiceactivityPin();
-    if (voiceActivtyStatus != oldVoiceActivityStatus && _watchdogTimer->isActive())
+    bool voiceActivityStatus = _raspiGpio.ReadVoiceactivityPin();
+    if (voiceActivityStatus != oldVoiceActivityStatus && _watchdogTimer->isActive())
     {
-        _comm->writePTT(voiceActivtyStatus);
-        _websocketServer->broadcastUpdate(websocketTxStatusCommand, { voiceActivtyStatus });
-        oldVoiceActivityStatus = voiceActivtyStatus;
+        _comm->writePTT(voiceActivityStatus);
+        _websocketServer->broadcastUpdate(websocketTxStatusCommand, { voiceActivityStatus });
+        oldVoiceActivityStatus = voiceActivityStatus;
     }
 
     // A heartbeat pin toggle restarts the watchdog timer
@@ -140,8 +143,14 @@ void CIVBridge::onPollInterval() const
     if (heartBeatStatus != oldHeartBeatStatus)
     {
         _watchdogTimer->start();
-        oldHeartBeatStatus = voiceActivtyStatus;
+        oldHeartBeatStatus = voiceActivityStatus;
     }
+}
+
+
+void CIVBridge::onWatchdogTimeout() const
+{
+    qDebug() << "Heartbeat Watchdog timeout!";
 }
 
 
