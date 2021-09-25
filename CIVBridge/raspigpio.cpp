@@ -16,9 +16,7 @@
 #define PAGE_SIZE			(4 * 1024)
 #define BLOCK_SIZE			(4 * 1024)
 
-volatile unsigned *gpio;
-
-#define GET_GPIO(g)         (*(gpio + 13) & (1 << g))       // 0 if LOW, (1 << g) if HIGH
+#define GET_GPIO(g)         (*(_gpio + 13) & (1 << g))       // 0 if LOW, (1 << g) if HIGH
 
 RaspiGpio::RaspiGpio(const quint8& voiceactivityPin, const quint8& heartbeatPin)
     : _voiceactivityPin(voiceactivityPin)
@@ -54,12 +52,12 @@ RaspiGpio::RaspiGpio(const quint8& voiceactivityPin, const quint8& heartbeatPin)
     }
 
     // Always use volatile pointer!
-    gpio = (volatile unsigned *)gpio_map;
+    _gpio = (volatile unsigned *)gpio_map;
 }
 
-bool ReadPin(const quint8& pinNumber)
+bool RaspiGpio::ReadPin(const quint8& pinNumber) const
 {
-    if (gpio == nullptr)
+    if (_gpio == nullptr)
     {
         return false;
     }

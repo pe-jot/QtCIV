@@ -12,7 +12,9 @@ public:
     bool ReadHeartbeatPin() const;
 
 private:
-    volatile unsigned *gpio = nullptr;
+    bool ReadPin(const quint8& pinNumber) const;
+
+    volatile unsigned *_gpio = nullptr;
     const quint8 _voiceactivityPin;
     const quint8 _heartbeatPin;
 };
