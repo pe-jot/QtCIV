@@ -18,26 +18,30 @@ int main(int argc, char *argv[])
     quint16 talkkonnectPort = DEFAULT_TALKKONNECT_PORT;
     quint8 voiceactivityPin = DEFAULT_VOICEACTIVITY_PIN;
     quint8 heartbeatPin = DEFAULT_HEARTBEAT_PIN;
+    qint32 heartbeatTimeout = DEFAULT_HEARTBEAT_TIMEOUT;
 
     QCommandLineParser argParser;
     argParser.setApplicationDescription(APPLICATION_DESCRIPTION);
     argParser.addHelpOption(); // -h, --help
     argParser.addVersionOption(); // -v, --version
 
-    QCommandLineOption debugOption({"d", "debug"}, QString("Print debug messages to console"));
+    QCommandLineOption debugOption("debug", QString("Print debug messages to console"));
     argParser.addOption(debugOption);
 
-    QCommandLineOption websocketPortOption({"w", "websocketport"}, QString("Websocket port to listen on. Default: %1").arg(websocketPort), QString("websocketPort"));
+    QCommandLineOption websocketPortOption("websocketport", QString("Websocket port to listen on. Default: %1").arg(websocketPort), QString("websocketPort"));
     argParser.addOption(websocketPortOption);
 
-    QCommandLineOption talkkonnectPortOption({"t", "talkkonnectport"}, QString("Talkkonnect HTTP port to listen on. Default: %1").arg(talkkonnectPort), QString("talkkonnectPort"));
+    QCommandLineOption talkkonnectPortOption("talkkonnectport", QString("Talkkonnect HTTP port to listen on. Default: %1").arg(talkkonnectPort), QString("talkkonnectPort"));
     argParser.addOption(talkkonnectPortOption);
 
-    QCommandLineOption voiceactivityPinOption({"a", "voiceactivitypin"}, QString("Raspberry Pi Talkkonnect VoiceActivity Pin number. Default: %1").arg(voiceactivityPin), QString("voiceactivityPin"));
+    QCommandLineOption voiceactivityPinOption("voiceactivitypin", QString("Raspberry Pi Talkkonnect VoiceActivity Pin number. Default: %1").arg(voiceactivityPin), QString("voiceactivityPin"));
     argParser.addOption(voiceactivityPinOption);
 
-    QCommandLineOption heartbeatPinOption({"b", "heartbeatpin"}, QString("Raspberry Pi Talkkonnect Heartbeat Pin number. Default: %1").arg(heartbeatPin), QString("heartbeatPin"));
+    QCommandLineOption heartbeatPinOption("heartbeatpin", QString("Raspberry Pi Talkkonnect Heartbeat Pin number. Default: %1").arg(heartbeatPin), QString("heartbeatPin"));
     argParser.addOption(heartbeatPinOption);
+
+    QCommandLineOption heartbeatTimeoutOption("hearbeattimeout", QString("Talkkonnect Heartbeat timeout in milliseconds. 0 ... disable, Default: %1").arg(heartbeatTimeout), QString("heartbeatTimeout"));
+    argParser.addOption(heartbeatTimeoutOption);
 
     argParser.process(a);
 
@@ -73,8 +77,14 @@ int main(int argc, char *argv[])
         heartbeatPin = intParameter;
     }
 
+    intParameter = argParser.value(heartbeatTimeoutOption).toInt(&conversionOk);
+    if (conversionOk)
+    {
+        heartbeatTimeout = intParameter;
+    }
+
     // Start CI-V bridge
-    auto bridge = new CIVBridge(websocketPort, talkkonnectPort, voiceactivityPin, heartbeatPin);
+    auto bridge = new CIVBridge(websocketPort, talkkonnectPort, voiceactivityPin, heartbeatPin, heartbeatTimeout);
 
     // Wrapper to catch CTRL Signals to exit application
     auto consoleSignalHandler = ConsoleSignalHandler::getInstance();

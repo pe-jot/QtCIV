@@ -14,13 +14,14 @@ const QString CIVBridge::websocketOvfStatusCommand = QStringLiteral("ovfStatus")
 const QString CIVBridge::websocketSMeterCommand = QStringLiteral("sMeter");
 
 
-CIVBridge::CIVBridge(const quint16& websocketPort, const quint16& talkkonnectPort, const quint8& voiceactivityPin, const quint8& heartbeatPin, QObject *parent)
+CIVBridge::CIVBridge(const quint16& websocketPort, const quint16& talkkonnectPort, const quint8& voiceactivityPin, const quint8& heartbeatPin, const qint32& heartbeatTimeout, QObject *parent)
     : QObject(parent)
     , _raspiGpio(voiceactivityPin, heartbeatPin)
     , _pollTimer(new QTimer())
     , _watchdogTimer(new QTimer())
     , _websocketServer(new WebSocketServer(websocketPort))
     , _talkkonnect(new TalkkonnectClient(QHostAddress::LocalHost, talkkonnectPort))
+    , _watchdogTimeoutMs(heartbeatTimeout)
 {
     connect(_websocketServer, &WebSocketServer::commandReceived, this, &CIVBridge::onWebsocketCommandReceived);
     connect(_websocketServer, &WebSocketServer::clientConnected, this, &CIVBridge::onWebsocketClientConnected);
@@ -30,6 +31,7 @@ CIVBridge::CIVBridge(const quint16& websocketPort, const quint16& talkkonnectPor
     connect(_comm, &IICOMcomm::dataReceived, this, &CIVBridge::onCIVDataReceived);
 
     connect(_watchdogTimer, &QTimer::timeout, this, &CIVBridge::onWatchdogTimeout);
+    _watchdogTimer->setSingleShot(true);
     _watchdogTimer->setInterval(_watchdogTimeoutMs);
 }
 
@@ -130,20 +132,23 @@ void CIVBridge::onPollInterval() const
     // A voiceactivity pin toggle triggers the PTT on the TRX
     static bool oldVoiceActivityStatus = false;
     bool voiceActivityStatus = _raspiGpio.ReadVoiceactivityPin();
-    if (voiceActivityStatus != oldVoiceActivityStatus && _watchdogTimer->isActive())
+    if (voiceActivityStatus != oldVoiceActivityStatus && (_watchdogTimer->isActive() || _watchdogTimeoutMs <= 0))
     {
         _comm->writePTT(voiceActivityStatus);
         _websocketServer->broadcastUpdate(websocketTxStatusCommand, { voiceActivityStatus });
         oldVoiceActivityStatus = voiceActivityStatus;
     }
 
-    // A heartbeat pin toggle restarts the watchdog timer
-    static bool oldHeartBeatStatus = false;
-    bool heartBeatStatus = _raspiGpio.ReadHeartbeatPin();
-    if (heartBeatStatus != oldHeartBeatStatus)
+    if (_watchdogTimeoutMs > 0)
     {
-        _watchdogTimer->start();
-        oldHeartBeatStatus = voiceActivityStatus;
+        static bool oldHeartBeatStatus = false;
+        // A heartbeat pin toggle restarts the watchdog timer
+        bool heartBeatStatus = _raspiGpio.ReadHeartbeatPin();
+        if (heartBeatStatus != oldHeartBeatStatus)
+        {
+            _watchdogTimer->start();
+            oldHeartBeatStatus = heartBeatStatus;
+        }
     }
 }
 

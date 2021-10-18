@@ -14,7 +14,7 @@ class CIVBridge : public QObject
     Q_OBJECT
 
 public:
-    explicit CIVBridge(const quint16& websocketPort = 88, const quint16& talkkonnectPort = 81, const quint8& voiceactivityPin = 5, const quint8& heartbeatPin = 25, QObject *parent = nullptr);
+    explicit CIVBridge(const quint16& websocketPort, const quint16& talkkonnectPort, const quint8& voiceactivityPin, const quint8& heartbeatPin, const qint32& heartbeatTimeout, QObject *parent = nullptr);
     CIVBridge(const CIVBridge&) = delete;
     CIVBridge& operator=(const CIVBridge&) = delete;
     ~CIVBridge();
@@ -37,8 +37,8 @@ private:
 
     CIVProtocol _civ;
     RaspiGpio _raspiGpio;
-    QTimer* _pollTimer;
-    QTimer* _watchdogTimer;
+    QTimer* _pollTimer = nullptr;
+    QTimer* _watchdogTimer = nullptr;
     WebSocketServer* _websocketServer = nullptr;
     IICOMcomm* _comm = nullptr;
     TalkkonnectClient* _talkkonnect = nullptr;
@@ -49,8 +49,8 @@ private:
     bool _overflowStatus = false;
     int _sMeter = 0;
 
+    const int _watchdogTimeoutMs = 0;
     const int _pollIntervalMs = 100;
-    const int _watchdogTimeoutMs = 3000;
 
     static const QString websocketErrorCommand;
     static const QString websocketRxFrequencyCommand;
