@@ -144,7 +144,7 @@ QString IC705Serial::FindIcomPortName()
 
         qDebug().noquote() << "Port:" << portName << "VID:" << QString::number(vid, 16) << "PID:" << QString::number(pid, 16);
 
-        if (vid == IC705Serial::ICOM_USB_VID && pid == IC705Serial::IC705_USB_PID)
+        //if (vid == IC705Serial::ICOM_USB_VID && pid == IC705Serial::IC705_USB_PID)
         {
             bool found = TryGetTransceiverId(portName);
             if (found)
